@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import datetime
-import json
-import time
 from typing import Any, Dict, List
 
+from app.services.vacancy_service import VacancyService
 from app.storage.db import get_connection
 from app.storage.hh_parser import run
-from app.core.config import settings
-from app.services.vacancy_service import VacancyService
 
 DEFAULT_QUERIES = [
     "Python developer",

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from app.domain.models import Vacancy
 from app.storage.db import get_connection

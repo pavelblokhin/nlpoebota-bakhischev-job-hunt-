@@ -10,8 +10,8 @@ from app.core.config import settings
 from app.core.logging import configure_logging
 from app.observability.metrics import metrics_middleware
 from app.observability.metrics import router as metrics_router
-from app.storage.db import init_db
 from app.services.parser_service import ParserService
+from app.storage.db import init_db
 
 
 def create_app() -> FastAPI:
