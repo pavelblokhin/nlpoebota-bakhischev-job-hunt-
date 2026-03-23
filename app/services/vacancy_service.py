@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import json
+<<<<<<< HEAD
+=======
+from pathlib import Path
+from typing import Optional
+>>>>>>> backup/local-before-sync
 
 from app.domain.models import Vacancy
 from app.storage.db import get_connection
@@ -23,6 +28,7 @@ class VacancyService:
                 mapped_rows.append(payload)
             return [Vacancy.from_dict(payload) for payload in mapped_rows]
 
+<<<<<<< HEAD
     def save_vacancies(self, vacancies: list[dict]) -> None:
         with get_connection(self.db_path) as conn:
             cursor = conn.cursor()
@@ -47,3 +53,10 @@ class VacancyService:
                     )
                 )
             conn.commit()
+=======
+    def get_vacancy(self, vacancy_id: str) -> Optional[Vacancy]:
+        for vac in self.load_vacancies():
+            if vac.id == vacancy_id:
+                return vac
+        return None
+>>>>>>> backup/local-before-sync
