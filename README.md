@@ -1,6 +1,6 @@
 # HR Career Assistant (MVP)
 
-Implementation based on [`design_doc.md`](design_doc.md) and backend-first plan in [`plans/mvp_implementation_plan.md`](plans/mvp_implementation_plan.md).
+Implementation based on [`design_doc.md`](design_doc.md).
 
 ## What is implemented
 
@@ -106,6 +106,48 @@ Monitoring stack:
 - Prometheus: `http://127.0.0.1:9090`
 - Grafana: `http://127.0.0.1:3000` (admin/admin)
 - Dashboard file: [`monitoring/grafana/dashboards/hr-assistant-overview.json`](monitoring/grafana/dashboards/hr-assistant-overview.json)
+
+### How to run Grafana + Prometheus
+
+```bash
+docker compose up --build backend prometheus grafana
+```
+
+Open:
+- API: `http://127.0.0.1:8000`
+- Prometheus: `http://127.0.0.1:9090`
+- Grafana: `http://127.0.0.1:3000` (login: `admin` / `admin`)
+
+Metrics endpoint exposed by backend: [`/metrics`](app/observability/metrics.py:24)
+
+## HH parser integration
+
+Parser components:
+- Core HH parser: [`app/storage/hh_parser.py`](app/storage/hh_parser.py)
+- Service wrapper: [`ParserService`](app/services/parser_service.py:20)
+- DB persistence: [`VacancyService.save_vacancies()`](app/services/vacancy_service.py:26)
+- API endpoints:
+  - [`POST /v1/parser/run`](app/api/routes_parser.py:11)
+  - [`POST /v1/parser/daily-update`](app/api/routes_parser.py:16)
+
+How it is integrated in runtime:
+- Container builds parser service in [`build_container()`](app/api/deps.py:38)
+- Parser routes are mounted in [`create_app()`](app/main.py:17)
+- Parser writes into SQLite table `vacancies` from [`SCHEMA_SQL`](app/storage/db.py:6)
+- Matching/indexing reads from the same table via [`VacancyService.load_vacancies()`](app/services/vacancy_service.py:13)
+
+Run parser manually via API:
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/parser/run
+curl -X POST http://127.0.0.1:8000/v1/parser/daily-update
+```
+
+Rebuild FAISS index after parser updates:
+
+```bash
+python3 scripts/build_index.py
+```
 
 ## Notes
 

@@ -15,7 +15,13 @@ class VacancyService:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM vacancies")
             rows = cursor.fetchall()
-            return [Vacancy.from_dict(dict(row)) for row in rows]
+            mapped_rows = []
+            for row in rows:
+                payload = dict(row)
+                # Domain model expects stable external vacancy id, not DB autoincrement id.
+                payload["id"] = payload.get("vacancy_id", payload.get("id"))
+                mapped_rows.append(payload)
+            return [Vacancy.from_dict(payload) for payload in mapped_rows]
 
     def save_vacancies(self, vacancies: list[dict]) -> None:
         with get_connection(self.db_path) as conn:

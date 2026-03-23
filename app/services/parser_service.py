@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from app.services.vacancy_service import VacancyService
 from app.storage.db import get_connection
@@ -28,9 +28,7 @@ class ParserService:
             cursor.execute("SELECT vacancy_id FROM vacancies")
             return {row[0] for row in cursor.fetchall()}
 
-    def parse_and_store_vacancies(self, queries: List[str], area: str = "1", pages: int = 1) -> None:
-        # Get existing vacancies to avoid duplicates
-
+    def parse_and_store_vacancies(self, queries: list[str], area: str = "1", pages: int = 1) -> int:
         # Run parser
         vacancies = run(
             queries=queries,
@@ -43,6 +41,7 @@ class ParserService:
         )
 
         self.vacancy_service.save_vacancies(vacancies)
+        return len(vacancies)
 
     def daily_update(self) -> None:
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
@@ -64,10 +63,9 @@ class ParserService:
         if vacancies:
             self.vacancy_service.save_vacancies(vacancies)
 
-    def run_parser(self) -> Dict[str, Any]:
+    def run_parser(self) -> dict[str, Any]:
         """Main entry point for the parser service"""
-
-        self.parse_and_store_vacancies(
+        parsed_count = self.parse_and_store_vacancies(
             queries=DEFAULT_QUERIES,
             area="113",
             pages=1
@@ -76,5 +74,6 @@ class ParserService:
         return {
             "status": "success",
             "message": "Vacancy parsing completed",
-            "vacancies_parsed": len(self.vacancy_service.load_vacancies())
+            "vacancies_parsed": parsed_count,
+            "vacancies_total": len(self.vacancy_service.load_vacancies()),
         }
